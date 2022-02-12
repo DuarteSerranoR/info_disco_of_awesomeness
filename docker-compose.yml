@@ -10,3 +10,15 @@ services:
     #  - ":"
     env_file:
       - .env
+  database:
+    container_name: database
+    image: postgres:14.2
+    restart: always
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    ports:
+      - '5432:5432'
+    volumes: 
+      - ./database:/var/lib/postgresql/data
