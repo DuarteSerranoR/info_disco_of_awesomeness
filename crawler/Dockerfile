@@ -1,13 +1,13 @@
 FROM rust AS build
 WORKDIR /app/build
-COPY . .
+COPY ./crawler ./crawler
+COPY ./logger ./logger
 
-# ENV CARGO_TARGET_DIR=/app/production 
+WORKDIR /app/build/crawler
+
 RUN cargo build --release
 
 FROM build AS production
-#COPY --from=build /app/production /app
-COPY --from=build /app/build/release /app
-WORKDIR /app
+COPY --from=build /app/build/crawler/target/release/ /app/
 
-ENTRYPOINT [ "crawler" ]
+ENTRYPOINT [ "/app/crawler" ]

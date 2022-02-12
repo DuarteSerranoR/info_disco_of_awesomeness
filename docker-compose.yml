@@ -1,10 +1,11 @@
 version: "3.8"
 services:
   crawler:
+    container_name: crawler-service
     image: du-crawler:${CRAWLER_VER}
     build:
-      context: ./crawler
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./crawler/Dockerfile
     #ports:
     #  - ":"
     env_file:
