@@ -4,11 +4,6 @@ use chrono::offset::Utc;
 use chrono::DateTime;
 use std::time::SystemTime;
 
-pub static CONSOLE_LOGGER: ConsoleLogger = ConsoleLogger;
-
-pub struct ConsoleLogger;
-
-    
 // --> Example of logger usages:
 // ############
 //log::info!("Starting up application");
@@ -17,6 +12,9 @@ pub struct ConsoleLogger;
 //log::debug!("debug");
 //log::log!(log::Level::Trace, "log");
 // ############ //
+
+pub struct ConsoleLogger;
+pub static CONSOLE_LOGGER: ConsoleLogger = ConsoleLogger;
 
 impl log::Log for ConsoleLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {

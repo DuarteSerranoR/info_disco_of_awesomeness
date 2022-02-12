@@ -7,7 +7,7 @@ use std::sync::{Arc,Mutex};
 use ctrlc;
 //use std::sync::mpsc::channel;
 //
-mod logger;
+use logger;
 use crate::logger::setup_logger;
 
 use std::collections::HashMap;
