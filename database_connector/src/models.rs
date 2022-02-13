@@ -11,3 +11,5 @@ pub struct Target {
     pub last_crawl: Option<SystemTime>,
     pub creation_time: Option<SystemTime>
 }
+
+// to insert targets, should follow https://diesel.rs/guides/getting-started
