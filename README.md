@@ -1,2 +1,2 @@
-# info_disco_of_awesomeness
+# Info disco of awesomeness
 Just having fun with rust

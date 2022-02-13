@@ -1,14 +1,13 @@
-use diesel::pg::types::sql_types::Uuid;
+use uuid::Uuid;
 use std::time::SystemTime;
-use diesel::prelude::*;
 
 #[derive(Queryable)]
 pub struct Target {
-    guid: Uuid,
-    name: String,
-    url: String,
-    active: bool,
-    interval: i32,
-    last_crawl: SystemTime,
-    creation_time: SystemTime
+    pub guid: Uuid,
+    pub name: String,
+    pub url: String,
+    pub active: bool,
+    pub interval: i32,
+    pub last_crawl: Option<SystemTime>,
+    pub creation_time: Option<SystemTime>
 }
