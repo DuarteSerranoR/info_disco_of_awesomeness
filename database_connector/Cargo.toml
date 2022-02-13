@@ -7,5 +7,6 @@ edition = "2021"
 # on your machine $[cargo install diesel_cli --no-default-features --features postgres]$
 
 [dependencies]
-diesel = { version = "1.4.4", features = ["postgres"] }
+diesel = { version = "1.4.8", features = ["postgres"] }
 dotenv = "0.15.0"
+chrono = "0.4.19"
