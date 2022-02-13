@@ -2,6 +2,7 @@ FROM rust AS build
 WORKDIR /app/build
 COPY ./crawler ./crawler
 COPY ./logger ./logger
+COPY ./database_connector ./database_connector
 
 WORKDIR /app/build/crawler
 

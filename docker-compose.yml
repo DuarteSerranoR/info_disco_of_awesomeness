@@ -6,8 +6,6 @@ services:
     build:
       context: .
       dockerfile: ./crawler/Dockerfile
-    #ports:
-    #  - ":"
     env_file:
       - .env
   database:

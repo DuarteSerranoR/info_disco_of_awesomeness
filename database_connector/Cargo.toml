@@ -3,6 +3,9 @@ name = "database_connector"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+# To help with the diesel depedency management, it is recommended instaling the diesel_cli
+# on your machine $[cargo install diesel_cli --no-default-features --features postgres]$
 
 [dependencies]
+diesel = { version = "1.4.4", features = ["postgres"] }
+dotenv = "0.15.0"

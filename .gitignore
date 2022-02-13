@@ -1,4 +1,5 @@
 /crawler/target
 /logger/target
+/database_connector/target
 /database/*
 Cargo.lock
