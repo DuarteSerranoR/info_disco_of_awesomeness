@@ -1,30 +1,19 @@
-//use std::sync::mpsc::{Sender, Receiver};
-//use std::sync::mpsc;
-
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc,Mutex};
-//
-use ctrlc;
-//use std::sync::mpsc::channel;
-//
-use logger;
-use crate::logger::setup_logger;
-
 use std::collections::HashMap;
 use uuid::Uuid;
 use std::{thread, time::Duration};
+use ctrlc;
+//use std::sync::mpsc::channel
+
+// Internal crates
+use logger;
+use crate::logger::setup_logger;
+use database_connector::models::*;
+use database_connector::functions::*;
 
 #[macro_use]
 extern crate lazy_static;
-
-struct Target {
-    guid: Uuid,
-    name: String,
-    url: String,
-    active: bool,
-    interval: u32 //,
-    // last_crawl: SystemTime
-}
 
 //static NTHREADS: i32 = 3;
 
@@ -81,28 +70,10 @@ fn set_handler() {
 fn get_targets() {
 
     // Hardcoded targets to later implement
-
-    // add loop with targets ###
-    let guid = Uuid::new_v4();
-    let target: Target = Target {
-        guid: guid,
-        name: String::from("name"),
-        url: String::from("url"),
-        active: true,
-        interval: 2
-    };
-    TARGETS.lock().unwrap().insert(guid, target );
-    // add loop with targets ###
-    
-    let guid1 = Uuid::new_v4();
-    let target1: Target = Target {
-        guid: guid,
-        name: String::from("name1"),
-        url: String::from("url1"),
-        active: true,
-        interval: 2
-    };
-    TARGETS.lock().unwrap().insert(guid1, target1 );
+    let targets_vec = get_active_targets();
+    for target in targets_vec {
+        TARGETS.lock().unwrap().insert(target.guid, target );
+    }
 
     log::info!("Database loaded to memory");
     log::info!("Starting crawler...");

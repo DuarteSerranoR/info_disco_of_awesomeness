@@ -1,5 +1,6 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE targets (
-  guid UUID NOT NULL,
+  guid UUID NOT NULL DEFAULT uuid_generate_v4(),
   name VARCHAR NOT NULL,
   url VARCHAR NOT NULL,
   active BOOLEAN NOT NULL DEFAULT 't',

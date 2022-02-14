@@ -12,6 +12,7 @@ edition = "2021"
 [dependencies]
 # Internal
 logger = { path = "../logger" }
+database_connector = { path = "../database_connector" }
 
 # External
 log = "0.4"
