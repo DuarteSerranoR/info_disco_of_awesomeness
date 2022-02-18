@@ -6,6 +6,12 @@
     "configurations": [
         {
             "type": "lldb",
+            "request": "attach",
+            "name": "Attach to crawler",
+            "program": "${workspaceFolder}/crawler/target/debug/crawler.exe"
+        },
+        {
+            "type": "lldb",
             "request": "launch",
             "name": "Debug executable 'crawler'",
             "cargo": {
@@ -20,7 +26,7 @@
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}/crawler"
+            "cwd": "${workspaceRoot}/crawler"
         },
         {
             "type": "lldb",

@@ -1,50 +1,100 @@
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc,Mutex};
-use std::collections::HashMap;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Web Crawler Binary
+/// 
+/// The purpose of this program is to get the projects information from the web.
+/// Using the database as configurationand outputing it's scraped data into the database for later usage.
+/// 
+/// Arguments:
+///     arg[0] = debug -> if you pass the "debug" word into the first argument, the application will run
+///                       in debug mode.
+/// 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+/// External imports
+use std::{sync, thread, env, thread::sleep, time::Duration, collections::HashMap};
+use sync::{Arc, Mutex, atomic};
+use atomic::{AtomicBool, Ordering};
 use uuid::Uuid;
-use std::{thread, time::Duration};
 use ctrlc;
 //use std::sync::mpsc::channel
 
-// Internal crates
+#[macro_use]
+extern crate lazy_static;
+
+
+/// Internal lib crates
 use logger;
 use crate::logger::setup_logger;
 use database_connector::models::*;
 use database_connector::functions::*;
 
-#[macro_use]
-extern crate lazy_static;
 
-//static NTHREADS: i32 = 3;
-
+// Static program variables
 lazy_static! {
     static ref TARGETS: Arc<Mutex<HashMap<Uuid, Target>>> = Arc::new(Mutex::new(HashMap::new()));
     static ref RUNNING: Arc<AtomicBool> = Arc::new(AtomicBool::new(true)).clone();
 }
+//static NTHREADS: i32 = 3;
 
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// Web Crawler
+///////////////////////////////////////////////////////////////////////////////
 fn main() {
+    
+
+    // Setup the program logs
     setup_logger().expect("");
+
     // Configure SIGTERM and SIGHUP handling
     // For CRL + C listening
     set_handler();
+    
+    // For debug ataching purposes //////////////////////////////////////////
+    let mut debug: bool = false;
+
+    let args: Vec<String> = env::args().collect();
+    if args.len() > 1 {
+        let first_arg: &str = &args[1];
+        let s: String = String::from("debug");
+
+        debug = first_arg.eq(&s);
+    
+        if debug {
+            log::info!("Crawler launched in debug mode");
+
+            let five_secs = Duration::from_millis(5000);
+            sleep(five_secs);
+        }
+    }
+    /////////////////////////////////////////////////////////////////////////
+
+
     log::info!("Program starting ...");
+
     
     // Get all initial information from db
     log::info!("Loading targets ...");
     get_targets();
-    //let targets = getTargets();
 
-    
-    let mut threads = Vec::new();
+
+    // Startup the service with the targets already cached in memory
+    log::info!("Starting crawler...");
 
     // Set a producer that handles the number of active targets being crawled and creates a queue
     //let (tx, rx): (Sender<i32>, Receiver<i32>) = mpsc::channel();
 
     // Set a producer to get the targets data, crawl and send data to a consumer
-    let producer = thread::spawn(move || target_producer());
+    let target_updater = thread::spawn(move || target_updater());
     let consumer = thread::spawn(move || data_consumer());
     let crawler = thread::spawn(move || crawler_service());
-    threads.push(producer);
+    
+    let mut threads = Vec::new();
+    threads.push(target_updater);
     threads.push(consumer);
     threads.push(crawler);
 
@@ -76,19 +126,24 @@ fn get_targets() {
     }
 
     log::info!("Database loaded to memory");
-    log::info!("Starting crawler...");
 
-    for (key, value) in TARGETS.lock().unwrap().iter() {
-        log::info!("{} / {}", key, value.name);
-    }
+    //for (key, value) in TARGETS.lock().unwrap().iter() {
+    //    log::info!("{} / {}", key, value.name);
+    //}
     
 }
 
-fn target_producer() {
-    log::info!("producer Service started");
+/////////////////////////////////////////////////////////////////
+/// This function/service will updates the 'TARGETS' vector
+/// with data from the database_connector.
+/////////////////////////////////////////////////////////////////
+fn target_updater() {
+    log::info!("Target updater service started");
     
-    // let d = Duration::from_millis(10);
     loop {
+        let five_secs = Duration::from_millis(5000);
+        sleep(five_secs);
+        
         let running = RUNNING.clone();
         if !running.load(Ordering::Acquire) {
             break;
