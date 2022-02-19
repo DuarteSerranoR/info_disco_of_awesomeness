@@ -15,11 +15,11 @@
 
 /// External imports
 use std::{sync, thread, env, time::Duration, collections::HashMap};
+use std::sync::mpsc::channel;
 use sync::{Arc, Mutex, atomic, mpsc};
 use atomic::{AtomicBool, Ordering};
 use uuid::Uuid;
 use ctrlc;
-use std::sync::mpsc::channel;
 
 #[macro_use]
 extern crate lazy_static;
@@ -89,16 +89,14 @@ fn main() {
 
     // Startup the service with the targets already cached in memory
     log::info!("Starting crawler...");
+    let mut threads = Vec::new();
 
     // Set a producer to get the targets data, crawl and send data to a consumer
     let target_updater = thread::spawn(move || target_updater());
-    //let consumer = thread::spawn(move || data_consumer());
-    //let crawler = thread::spawn(move || crawler_service());
-
-    let mut threads = Vec::new();
     threads.push(target_updater);
-    //threads.push(consumer);
-    //threads.push(crawler);
+
+    let crawler_service = thread::spawn(move || crawler_service());
+    threads.push(crawler_service);
 
     // Wait for the threads to complete any remaining work
     for thread in threads {
@@ -150,17 +148,12 @@ fn sleep(duration: Duration) {
 /////////////////////////////////////////////////////////////////
 fn get_targets() {
 
-    // Hardcoded targets to later implement
     let targets_vec = get_active_targets();
     for target in targets_vec {
         TARGETS.lock().unwrap().insert(target.guid, target);
     }
 
     log::info!("Database loaded to memory");
-
-    //for (key, value) in TARGETS.lock().unwrap().iter() {
-    //    log::info!("{} / {}", key, value.name);
-    //}
     
 }
 
@@ -172,7 +165,7 @@ fn target_updater() {
     log::info!("Target updater service started");
     
     loop {
-        let five_secs = Duration::from_millis(5000);
+        let five_secs = Duration::from_secs(120000);
         sleep(five_secs);
         
         let running = RUNNING.clone();
@@ -180,46 +173,48 @@ fn target_updater() {
             break;
         }
 
-        log::info!("work1");
-        thread::sleep(Duration::from_secs(2));
-        log::info!("work2");
+        // Reload targets
+        let targets_vec = get_active_targets();
+        let loaded_targets_hash = TARGETS.clone();
+        for target in targets_vec {
+            // Compare the Target object and pop it from an cloned targets_hash
+            // to later pop the non-existing ones in the database.
+            match TARGETS.lock().unwrap().get(&target.guid) {
+                Some(loaded_target) => {
+                    loaded_targets_hash.lock().unwrap().remove(&target.guid);
+                    
+                    /*
+                    // Compare and alter
+                    if loaded_target.eq(target) {
+
+                    }
+                    else {
+
+                    }
+                    */
+                },
+                None => {
+                    // Add it
+                    TARGETS.lock().unwrap().insert(target.guid, target);
+                }
+            }
+        }
+        
+        for (uuid, _) in loaded_targets_hash.lock().unwrap().iter() {
+            TARGETS.lock().unwrap().remove(uuid);
+        }
     }
 }
 
-/*
 fn crawler_service() {
     log::info!("Crawler Service started");
-    
-    // let d = Duration::from_millis(10);
+
     loop {
         let running = RUNNING.clone();
         if !running.load(Ordering::Acquire) {
             break;
         }
 
-        log::info!("work1");
-        thread::sleep(Duration::from_secs(2));
-        log::info!("work2");
-        //rx.recv_timeout(d);
+
     }
 }
-
-
-fn data_consumer() {
-    log::info!("DataConsumer Service started");
-    
-    // let d = Duration::from_millis(10);
-    loop {
-        let running = RUNNING.clone();
-        if !running.load(Ordering::Acquire) {
-            break;
-        }
-
-        log::info!("work1");
-        thread::sleep(Duration::from_secs(2));
-        log::info!("work2");
-
-        //rx.recv_timeout(d);
-    }
-}
-*/

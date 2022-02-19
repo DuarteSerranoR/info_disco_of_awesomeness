@@ -12,4 +12,15 @@ pub struct Target {
     pub creation_time: Option<SystemTime>
 }
 
+impl PartialEq for Target {
+    fn eq(&self, other: &Self) -> bool {
+        return self.guid == other.guid &&
+        self.name == other.name &&
+        self.url == other.url &&
+        self.interval == other.interval &&
+        self.last_crawl == other.last_crawl &&
+        self.creation_time == other.creation_time
+    }
+}
+
 // to insert targets, should follow https://diesel.rs/guides/getting-started
