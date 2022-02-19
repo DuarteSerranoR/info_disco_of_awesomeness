@@ -48,6 +48,8 @@ fn setup_channel() -> (Arc<Mutex<mpsc::Sender<()>>>, Arc<Mutex<mpsc::Receiver<()
 ///////////////////////////////////////////////////////////////////////////////
 fn main() {
 
+    // Setup Configurations /////////////////////////////////////////////////
+
     // Setup the program logs
     setup_logger().expect("");
 
@@ -55,6 +57,7 @@ fn main() {
     // For CRL + C listening
     set_handler();
     
+
     // For debug ataching purposes //////////////////////////////////////////
     let mut debug: bool = false;
 
@@ -75,6 +78,7 @@ fn main() {
     /////////////////////////////////////////////////////////////////////////
 
 
+    // Startup
     log::info!("Program starting ...");
 
     
@@ -88,13 +92,13 @@ fn main() {
 
     // Set a producer to get the targets data, crawl and send data to a consumer
     let target_updater = thread::spawn(move || target_updater());
-    let consumer = thread::spawn(move || data_consumer());
-    let crawler = thread::spawn(move || crawler_service());
+    //let consumer = thread::spawn(move || data_consumer());
+    //let crawler = thread::spawn(move || crawler_service());
 
     let mut threads = Vec::new();
     threads.push(target_updater);
-    threads.push(consumer);
-    threads.push(crawler);
+    //threads.push(consumer);
+    //threads.push(crawler);
 
     // Wait for the threads to complete any remaining work
     for thread in threads {
@@ -119,7 +123,7 @@ fn set_handler() {
         // Interrupt/invoke_timeout sleeping threads
         let _ = RUNNING_CHANNEL.0.lock().unwrap().send(());
     }).expect("Error setting Ctrl-C handler");
-    
+
 }
 
 ///////////////////////////////////////////////////////////////
@@ -182,7 +186,7 @@ fn target_updater() {
     }
 }
 
-
+/*
 fn crawler_service() {
     log::info!("Crawler Service started");
     
@@ -218,3 +222,4 @@ fn data_consumer() {
         //rx.recv_timeout(d);
     }
 }
+*/
