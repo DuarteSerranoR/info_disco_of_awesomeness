@@ -165,7 +165,8 @@ fn target_updater() {
     log::info!("Target updater service started");
     
     loop {
-        let five_secs = Duration::from_secs(120000);
+        //let five_secs = Duration::from_secs(120000);
+        let five_secs = Duration::from_secs(5);
         sleep(five_secs);
         
         let running = RUNNING.clone();
@@ -175,35 +176,49 @@ fn target_updater() {
 
         // Reload targets
         let targets_vec = get_active_targets();
-        let loaded_targets_hash = TARGETS.clone();
+        //let loaded_targets_hash = TARGETS.clone();
+
+        // TODO - improve
+        let mut loaded_targets_hash: HashMap<&Uuid, &Target> = HashMap::new();
+        let locked_targets = TARGETS.lock().unwrap();
+        for hash_target in locked_targets.iter() {
+            loaded_targets_hash.insert(hash_target.0, hash_target.1);
+        }
+
         for target in targets_vec {
             // Compare the Target object and pop it from an cloned targets_hash
             // to later pop the non-existing ones in the database.
-            match TARGETS.lock().unwrap().get(&target.guid) {
+            match locked_targets.get(&target.guid) {
                 Some(loaded_target) => {
-                    loaded_targets_hash.lock().unwrap().remove(&target.guid);
+                    loaded_targets_hash.remove(&target.guid);
                     
-                    /*
                     // Compare and alter
-                    if loaded_target.eq(target) {
-
+                    if loaded_target.eq(&target) {
+                        continue;
+                    } else {
+                        let mut locked_targets_mut = TARGETS.lock().unwrap();
+                        locked_targets_mut.entry(target.guid).and_modify(|t| { *t = target }); // TODO - To test
+                        drop(locked_targets_mut);
                     }
-                    else {
-
-                    }
-                    */
                 },
                 None => {
                     // Add it
-                    TARGETS.lock().unwrap().insert(target.guid, target);
+                    let mut locked_targets_mut = TARGETS.lock().unwrap(); // TODO - To test
+                    locked_targets_mut.insert(target.guid, target);
+                    drop(locked_targets_mut);
                 }
             }
         }
         
-        for (uuid, _) in loaded_targets_hash.lock().unwrap().iter() {
-            TARGETS.lock().unwrap().remove(uuid);
+        for (uuid, _) in loaded_targets_hash.iter() {
+            // Remove
+            let mut locked_targets_mut = TARGETS.lock().unwrap();
+            locked_targets_mut.remove(uuid); // TODO - To test
+            drop(locked_targets_mut);
         }
     }
+
+    log::info!("Target updater service exited");
 }
 
 fn crawler_service() {
@@ -217,4 +232,6 @@ fn crawler_service() {
 
 
     }
+
+    log::info!("Crawler Service exited");
 }
