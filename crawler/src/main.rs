@@ -198,25 +198,20 @@ fn target_updater() {
                     if loaded_target.eq(&target) {
                         continue;
                     } else {
-                        //let mut mut_targets = lock.unwrap();
-                        targets.entry(target.guid).and_modify(|t: &mut Target| { *t = target }); // TODO - To test
-                        //drop(mut_targets);
+                        targets.entry(target.guid)
+                                .and_modify(|t: &mut Target| { *t = target });
                     }
                 },
                 None => {
                     // Add it
-                    //let mut mut_targets = lock.unwrap();
-                    targets.insert(target.guid, target); // TODO - To test
-                    //drop(mut_targets);
+                    targets.insert(target.guid, target);
                 }
             }
         }
         
         for (uuid, _) in loaded_targets_hash.iter() {
             // Remove
-            //let mut mut_targets = lock.unwrap();
-            targets.remove(uuid); // TODO - To test
-            //drop(mut_targets);
+            targets.remove(uuid);
         }
         drop(lock);
     }
