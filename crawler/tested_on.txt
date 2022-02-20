@@ -1,0 +1,7 @@
+This program was tested on the following targets so far:
+    Microsoft Research
+
+TODO
+    implement a dns to database, so it can use robots.txt in a generalized way
+    one more research oriented rss feed
+    
