@@ -142,10 +142,10 @@ fn sleep(duration: Duration) {
 
 }
 
-/////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 /// This function/method loads all initial target data 
 /// into memory cache before starting to crawl.
-/////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 fn get_targets() {
 
     let targets_vec = get_active_targets();
@@ -166,29 +166,31 @@ fn target_updater() {
     
     loop {
         //let five_secs = Duration::from_secs(120000);
-        let five_secs = Duration::from_secs(5);
+        let five_secs: Duration = Duration::from_secs(5);
         sleep(five_secs);
         
-        let running = RUNNING.clone();
+        let running: Arc<AtomicBool> = RUNNING.clone();
         if !running.load(Ordering::Acquire) {
             break;
         }
 
         // Reload targets
-        let targets_vec = get_active_targets();
-        //let loaded_targets_hash = TARGETS.clone();
+        let targets_vec: Vec<Target> = get_active_targets();
 
-        // TODO - improve
+        let mut lock = TARGETS.lock();
+        let targets = lock.as_mut().unwrap();
+
         let mut loaded_targets_hash: HashMap<&Uuid, &Target> = HashMap::new();
-        let locked_targets = TARGETS.lock().unwrap();
-        for hash_target in locked_targets.iter() {
-            loaded_targets_hash.insert(hash_target.0, hash_target.1);
+
+        let t = targets.clone();
+        for hash_target in t.iter() {
+            loaded_targets_hash.insert(&hash_target.0, &hash_target.1);
         }
 
         for target in targets_vec {
             // Compare the Target object and pop it from an cloned targets_hash
             // to later pop the non-existing ones in the database.
-            match locked_targets.get(&target.guid) {
+            match targets.get(&target.guid) {
                 Some(loaded_target) => {
                     loaded_targets_hash.remove(&target.guid);
                     
@@ -196,26 +198,27 @@ fn target_updater() {
                     if loaded_target.eq(&target) {
                         continue;
                     } else {
-                        let mut locked_targets_mut = TARGETS.lock().unwrap();
-                        locked_targets_mut.entry(target.guid).and_modify(|t| { *t = target }); // TODO - To test
-                        drop(locked_targets_mut);
+                        //let mut mut_targets = lock.unwrap();
+                        targets.entry(target.guid).and_modify(|t: &mut Target| { *t = target }); // TODO - To test
+                        //drop(mut_targets);
                     }
                 },
                 None => {
                     // Add it
-                    let mut locked_targets_mut = TARGETS.lock().unwrap(); // TODO - To test
-                    locked_targets_mut.insert(target.guid, target);
-                    drop(locked_targets_mut);
+                    //let mut mut_targets = lock.unwrap();
+                    targets.insert(target.guid, target); // TODO - To test
+                    //drop(mut_targets);
                 }
             }
         }
         
         for (uuid, _) in loaded_targets_hash.iter() {
             // Remove
-            let mut locked_targets_mut = TARGETS.lock().unwrap();
-            locked_targets_mut.remove(uuid); // TODO - To test
-            drop(locked_targets_mut);
+            //let mut mut_targets = lock.unwrap();
+            targets.remove(uuid); // TODO - To test
+            //drop(mut_targets);
         }
+        drop(lock);
     }
 
     log::info!("Target updater service exited");

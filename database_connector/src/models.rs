@@ -1,7 +1,7 @@
 use uuid::Uuid;
 use std::time::SystemTime;
 
-#[derive(Queryable)]
+#[derive(Queryable, Clone)]
 pub struct Target {
     pub guid: Uuid,
     pub name: String,
@@ -22,5 +22,13 @@ impl PartialEq for Target {
         self.creation_time == other.creation_time
     }
 }
+
+//impl Copy for Target { }
+
+/*impl Clone for Target {
+    fn clone(&self) -> Target {
+        *self
+    }
+}*/
 
 // to insert targets, should follow https://diesel.rs/guides/getting-started
