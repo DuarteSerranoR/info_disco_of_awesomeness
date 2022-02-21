@@ -9,7 +9,11 @@ pub struct Target {
     pub active: bool,
     pub interval: i32,
     pub last_crawl: Option<SystemTime>,
-    pub creation_time: Option<SystemTime>
+    pub creation_time: Option<SystemTime>,
+    pub dns: String,
+    pub comments: Option<String>,
+    pub logs: Option<String>,
+    pub fulltext_tag: Option<String>
 }
 
 impl PartialEq for Target {

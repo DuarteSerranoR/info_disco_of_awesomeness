@@ -5,11 +5,11 @@ pub struct Robots {
 }
 
 impl Robots {
-    pub fn load_robots(self, dns: String) {
-        
+    pub fn load_robots(self, _dns: String) -> Robots {
+        return self;
     }
     
-    pub fn check_url(self, url: String) -> bool {
+    pub fn check_url(self, _url: String) -> bool {
         return true;
     }
 }

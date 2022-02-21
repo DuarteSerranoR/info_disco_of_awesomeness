@@ -1,0 +1,8 @@
+ALTER TABLE targets
+DROP COLUMN logs;
+
+ALTER TABLE targets
+DROP COLUMN comments;
+
+ALTER TABLE targets
+DROP COLUMN dns;

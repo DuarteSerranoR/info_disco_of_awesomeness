@@ -24,7 +24,8 @@ fn main() {
         active: true,
         interval: 120,
         last_crawl: Option::None,
-        creation_time: Option::Some(SystemTime::now())
+        creation_time: Option::Some(SystemTime::now()),
+        dns: String::from("www.microsoft.com")
     };
     */
 
@@ -38,11 +39,11 @@ fn main() {
         disalowed_vec: Vec::new(),
         crawl_delay: None
     };
-    //robots.load_robots(test_target.dns);
+    let robots = robots.load_robots(test_target.dns.clone());
 
     // Crawl
-    if robots.check_url(test_target.url) {
-        //scraper.crawl_rss();
+    if robots.check_url(test_target.url.clone()) {
+        //if scraper.crawl_rss(test_target.fulltext)
 
         //  foreach article in scraper.articles
         //      if robots.check_url(article)
