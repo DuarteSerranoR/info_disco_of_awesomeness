@@ -37,5 +37,15 @@ fn main() {
         disalowed_vec: Vec::new(),
         crawl_delay: None
     };
-    robots.load_robots(test_target.url);
+    //robots.load_robots(test_target.dns);
+
+    if robots.check_url(test_target.url) {
+        //scraper.crawl_rss();
+
+        //  foreach article in scraper.articles
+        //      if robots.check_url(article)
+        //          scraper.crawl_item(article);
+
+        // If product, then to database, otherwise (here) print the formated results
+    }
 }

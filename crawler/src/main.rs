@@ -33,7 +33,6 @@ use database_connector::functions::*;
 
 /// Crawler
 pub mod robots_scraper;
-use robots_scraper::Robots;
 
 // Static program variables
 lazy_static! {
