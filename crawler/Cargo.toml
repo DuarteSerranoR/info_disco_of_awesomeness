@@ -3,6 +3,11 @@ name = "crawler"
 version = "0.1.0"
 edition = "2021"
 
+#[lib]
+# crate-type = ["rlib", "dylib", "cdylib", "staticlib"]
+#name = "crawler"
+#path = "src/lib.rs"
+
 # This config should go somewhere else - https://doc.rust-lang.org/cargo/reference/config.html
 # [config]
 # build = "/app/production/"

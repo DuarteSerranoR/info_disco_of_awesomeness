@@ -31,6 +31,10 @@ use crate::logger::setup_logger;
 use database_connector::models::*;
 use database_connector::functions::*;
 
+/// Crawler
+pub mod robots_scraper;
+use robots_scraper::Robots;
+
 // Static program variables
 lazy_static! {
     static ref TARGETS: Arc<Mutex<HashMap<Uuid, Target>>> = Arc::new(Mutex::new(HashMap::new()));
@@ -79,7 +83,7 @@ fn main() {
 
 
     // Startup
-    log::info!("Program starting ...");
+    log::info!("### Program starting ###");
 
     
     // Get all initial information from db
@@ -103,8 +107,7 @@ fn main() {
         thread.join().expect("oops! the {thread.name} thread panicked");
     }
 
-    log::info!("Closing Crawler...");
-    log::info!("Process finished");
+    log::info!("### Process finished ###");
 }
 
 ///////////////////////////////////////////////////////////////
@@ -115,7 +118,8 @@ fn set_handler() {
 
     let r = RUNNING.clone();
     ctrlc::set_handler(move || {
-        log::info!("Received signal to stop application");
+        log::info!("# Received signal to stop application");
+        log::info!("# Closing Crawler services...");
         // Update Atomic bool
         r.store(false, Ordering::SeqCst);
         // Interrupt/invoke_timeout sleeping threads
@@ -139,7 +143,6 @@ fn sleep(duration: Duration) {
             return;
         }
     }
-
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -152,9 +155,7 @@ fn get_targets() {
     for target in targets_vec {
         TARGETS.lock().unwrap().insert(target.guid, target);
     }
-
-    log::info!("Database loaded to memory");
-    
+    log::info!("# Database loaded to memory");
 }
 
 /////////////////////////////////////////////////////////////////
@@ -219,6 +220,9 @@ fn target_updater() {
     log::info!("Target updater service exited");
 }
 
+/////////////////////////////////////////////////////////////////
+/// TODO 
+/////////////////////////////////////////////////////////////////
 fn crawler_service() {
     log::info!("Crawler Service started");
 

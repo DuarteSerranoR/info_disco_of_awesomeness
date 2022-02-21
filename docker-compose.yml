@@ -8,6 +8,8 @@ services:
       dockerfile: ./crawler/Dockerfile
     env_file:
       - .env
+    environment:
+      - DATABASE_URL=postgres://sa:crawlsysadm2022@database/crawler_db
   database:
     container_name: database
     image: postgres:14.2

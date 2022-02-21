@@ -23,12 +23,4 @@ impl PartialEq for Target {
     }
 }
 
-//impl Copy for Target { }
-
-/*impl Clone for Target {
-    fn clone(&self) -> Target {
-        *self
-    }
-}*/
-
 // to insert targets, should follow https://diesel.rs/guides/getting-started

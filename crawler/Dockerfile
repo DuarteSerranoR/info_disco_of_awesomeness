@@ -8,7 +8,7 @@ WORKDIR /app/build/crawler
 
 RUN cargo build --release
 
-FROM build AS production
+FROM build AS release
 COPY --from=build /app/build/crawler/target/release/ /app/
 
 ENTRYPOINT [ "/app/crawler" ]
