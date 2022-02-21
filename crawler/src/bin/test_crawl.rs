@@ -32,6 +32,7 @@ fn main() {
     log::info!("Crawling Started");
 
     // TODO
+    // Load Robots.txt
     let robots: Robots = Robots {
         robots_url: None,
         disalowed_vec: Vec::new(),
@@ -39,6 +40,7 @@ fn main() {
     };
     //robots.load_robots(test_target.dns);
 
+    // Crawl
     if robots.check_url(test_target.url) {
         //scraper.crawl_rss();
 
