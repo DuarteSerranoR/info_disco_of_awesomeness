@@ -1,4 +1,6 @@
+use crate::webclient::WebClient;
 use robotstxt::{DefaultMatcher, matcher::{LongestMatchRobotsMatchStrategy, RobotsMatcher}};
+
 
 pub struct Robots<'a> {
     pub robots_url: Option<String>,
@@ -9,13 +11,14 @@ pub struct Robots<'a> {
     //pub allowed_vec: Vec<String>
 }
 
-impl Robots<'_> {
+impl Robots<'static> {
 
-    pub fn load_robots(mut self, _dns: String) -> Self {
+    pub async fn load_robots(mut self, _dns: String) -> Robots<'static> {
         self.robots_url = Option::Some(format!("https://{}/robots.txt", _dns));
 
-        let robots_body = "";
-        
+        let web_client = WebClient::new();
+        let response = web_client.get(self.robots_url.clone().unwrap()).await;
+        let robots_body = response.body;
         
         //self.robots_url.as_ref().unwrap().as_str()
 

@@ -9,7 +9,8 @@ use crate::logger::setup_logger;
 
 use crawler::robots_scraper::*;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     setup_logger().expect("");
     let targets_vec = get_active_targets();
 
@@ -45,7 +46,7 @@ fn main() {
         body: String::from(""),
         //crawl_delay: None
     };
-    let robots = robots.load_robots(test_target.dns.clone());
+    let robots = robots.load_robots(test_target.dns.clone()).await;
 
     // Crawl
     if robots.check_url(test_target.url.clone()) {

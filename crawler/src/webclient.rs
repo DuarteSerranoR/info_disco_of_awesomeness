@@ -1,35 +1,72 @@
-use hyper::Error;
 use std::str;
 use hyper::Client;
 
-async fn get_str(url: String) -> String {
+#[derive(Clone)]
+pub struct WebClient {
+    url: String,
+    pub success: bool,
+    pub status: u16,
+    pub body: String,
+    result: Option<Result<(String, u16), (String, u16)>>
+}
+
+impl WebClient {
+    pub fn new() -> Self {
+        return Self {
+            url: String::new(),
+            success: false,
+            status: 0,
+            body: String::new(),
+            result: Option::None
+        }
+    }
+
+    pub async fn get(mut self, url: String) -> Self {
+
+        self.url = url;
+        
+        self = self.request().await;
+
+        self.success = self.result.clone().unwrap().is_ok();
+        self.body = self.result.clone().unwrap().unwrap().0;
+        self.status = self.result.clone().unwrap().unwrap().1;
+
+        return self;
+    }
+
+    async fn request(mut self) -> Self {
     
-    let response = request(url);
+        let url = self.url.parse::<hyper::Uri>().unwrap();
+        self.result = Option::Some(self.clone().fetch_url(url).await);
+        return self;
+    }
 
-    return String::from("");
-}
+    async fn fetch_url(self, url: hyper::Uri) -> Result<(String, u16), (String, u16)> {
+        drop(self);
 
-#[tokio::main]
-async fn request(url: String) -> String {
+        let client = Client::new();
 
-    // HTTPS requires picking a TLS implementation, so give a better
-    // warning if the user tries to request an 'https' URL.
-    let url = url.parse::<hyper::Uri>().unwrap();
-    let response = fetch_url(url).await;
-    return response.unwrap();
-}
+        let response = match client.get(url).await {
+            Ok(response) => response,
+            Err(error) => return Result::Err((String::from(error.to_string()), 0)) // TODO - http vs https
+        };
 
-async fn fetch_url(url: hyper::Uri) -> Result<String, Error> { // TODO -> pass the error to the target to log
-    let client = Client::new();
-
-    let res = client.get(url).await?;
+        let status = response.status().as_u16();
+        
+        let response_bytes = match hyper::body::to_bytes(response).await {
+            Ok(response_bytes) => response_bytes,
+            Err(error) => return Result::Err((String::from(error.to_string()), status))
+        };
     
-    let buf = hyper::body::to_bytes(res).await?;
+        return match str::from_utf8(&response_bytes) { // TODO - implement other encodings like ISO 8859 (...)
+            Ok(response_str) => Result::Ok((String::from(response_str), status)),
+            Err(error) => Result::Err((String::from(error.to_string()), status))
+        };
 
-    let result = match str::from_utf8(&buf) {
-        Ok(response_str) => String::from(response_str),
-        Err(error) => String::from(error.to_string())//Error::from(err))//)err),
-    };
-
-    return Result::Ok(result);
+        //  Alternative to later test, this way, we go directly to getting the request string:
+        //let mut body = String::new();
+        //result.read_to_string(&mut body).unwrap();
+        
+    }
 }
+

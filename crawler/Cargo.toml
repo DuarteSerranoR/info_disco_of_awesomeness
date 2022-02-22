@@ -27,6 +27,7 @@ uuid = { version = "0.8.2", features = ["serde", "v4"] }
 lazy_static = "1.4.0"
 robotstxt = "0.3.0"
 hyper = { version = "0.14.17", features = ["full"] }
+hyper-tls = { version = "0.5.0" }
 tokio = { version = "1.17.0", features = ["full"] }
 #uuid = "0.8.2"
 

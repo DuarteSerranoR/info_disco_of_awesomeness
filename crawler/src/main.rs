@@ -33,6 +33,7 @@ use database_connector::functions::*;
 
 /// Crawler
 pub mod robots_scraper;
+pub mod webclient;
 
 // Static program variables
 lazy_static! {
@@ -162,7 +163,10 @@ fn get_targets() {
 /// with data from the database_connector.
 /////////////////////////////////////////////////////////////////
 fn target_updater() {
-    log::info!("Target updater service started");
+    log::info!("Target updater service started"); // TODO -> instead of doing this, loop through targets in the crawler
+                                                  //    service, when the loop is completed, get new targets from db, 
+                                                  //    repeat loop and so on. Use a channel but don't forget about the 
+                                                  //    handler.
     
     loop {
         //let five_secs = Duration::from_secs(120000);
