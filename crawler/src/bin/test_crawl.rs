@@ -1,4 +1,6 @@
 use uuid::Uuid;
+use std::time::Duration;
+use std::thread::sleep;
 
 use database_connector::models::*;
 use database_connector::functions::*;
@@ -33,11 +35,15 @@ fn main() {
     log::info!("Crawling Started");
 
     // TODO
+    let time: Duration = Duration::from_secs(5); //
+    sleep(time); //
+
     // Load Robots.txt
     let robots: Robots = Robots {
         robots_url: None,
-        disalowed_vec: Vec::new(),
-        crawl_delay: None
+        matcher: None,
+        body: String::from(""),
+        //crawl_delay: None
     };
     let robots = robots.load_robots(test_target.dns.clone());
 

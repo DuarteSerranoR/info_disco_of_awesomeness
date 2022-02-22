@@ -12,6 +12,12 @@
         },
         {
             "type": "lldb",
+            "request": "attach",
+            "name": "Attach to test_crawl",
+            "program": "${workspaceFolder}/crawler/target/debug/test_crawl.exe"
+        },
+        {
+            "type": "lldb",
             "request": "launch",
             "name": "Debug executable 'crawler'",
             "cargo": {
