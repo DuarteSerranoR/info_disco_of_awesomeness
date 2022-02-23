@@ -45,11 +45,14 @@ async fn main() {
         matcher: Option::None,
         body: String::new(),
         //crawl_delay: None
+        should_crawl: true,
+        success: false
     };
-    let robots = robots.load_robots(test_target.dns.clone()).await;
+    let robots = robots.load_robots(test_target.clone(), test_target.dns.clone()).await;
 
     // Crawl
     if robots.check_url(test_target.url.clone()) {
+        log::info!("crawl");
         //if scraper.crawl_rss(test_target.fulltext)
 
         //  foreach article in scraper.articles

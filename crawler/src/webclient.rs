@@ -41,7 +41,7 @@ impl WebClient {
         self.body = self.clone().result.unwrap().0;
         self.status = self.clone().result.unwrap().1;
         
-        log::info!("{}", format!("success: {}, status {}, body {}", self.clone().success, self.clone().status.to_string(), self.clone().body));
+        //log::info!("{}", format!("success: {}, status {}, body {}", self.clone().success, self.clone().status.to_string(), self.clone().body));
 
         return self;
     }

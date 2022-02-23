@@ -1,4 +1,5 @@
 use crate::webclient::WebClient;
+use database_connector::models::Target;
 use robotstxt::{DefaultMatcher, matcher::{LongestMatchRobotsMatchStrategy, RobotsMatcher}};
 
 
@@ -9,22 +10,49 @@ pub struct Robots<'a> {
     //pub crawl_delay: Option<i32>,
     //pub disallowed_vec: Vec<String>,
     //pub allowed_vec: Vec<String>
+    pub success: bool,
+    pub should_crawl: bool
 }
 
 impl Robots<'static> {
 
-    pub async fn load_robots(mut self, _dns: String) -> Robots<'static> {
-        self.robots_url = format!("https://{}/robots.txt", _dns);
+    pub async fn load_robots(mut self, target: Target, dns: String) -> Robots<'static> {
+        self.robots_url = format!("https://{}/robots.txt", dns);
+        drop(dns);
 
         let web_client = WebClient::new();
         let response = web_client.get(self.robots_url.clone()).await;
-        let robots_body = response.body;
+
+        if response.success.clone() {
+            self.body = response.body.clone();
+            self.should_crawl = true;
+            self.success = true;
+            drop(target);
+            drop(response);
+        }
+        else {
+            self.body = String::from("");
+            log::error!("Robots.txt for target '{}' returned with status {}. Message: {}", 
+                        target.guid, response.status.clone(), response.body);
+            drop(target);
+            self.success = false;
+
+            // Check if we should crawl at all
+            match response.status {
+                0 => self.should_crawl = false, // Program's fault
+                401 => self.should_crawl = false, // Unauthorized
+                402 => self.should_crawl = false, // Payment Required
+                403 => self.should_crawl = false, // Forbidden
+                _ => self.should_crawl = true
+            }
+            drop(response);
+            return self;
+        }
         
         //self.robots_url.as_ref().unwrap().as_str()
 
         // TODO -> make my own implementation for crawl_interval and other necessities
         let matcher: RobotsMatcher<LongestMatchRobotsMatchStrategy> = DefaultMatcher::default();
-        self.body = String::from(robots_body);
         self.matcher = Option::Some(matcher);
         return self;
     }
