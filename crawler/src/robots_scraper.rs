@@ -3,7 +3,7 @@ use robotstxt::{DefaultMatcher, matcher::{LongestMatchRobotsMatchStrategy, Robot
 
 
 pub struct Robots<'a> {
-    pub robots_url: Option<String>,
+    pub robots_url: String,
     pub matcher: Option<RobotsMatcher<'a, LongestMatchRobotsMatchStrategy>>,
     pub body: String,
     //pub crawl_delay: Option<i32>,
@@ -14,10 +14,10 @@ pub struct Robots<'a> {
 impl Robots<'static> {
 
     pub async fn load_robots(mut self, _dns: String) -> Robots<'static> {
-        self.robots_url = Option::Some(format!("https://{}/robots.txt", _dns));
+        self.robots_url = format!("https://{}/robots.txt", _dns);
 
         let web_client = WebClient::new();
-        let response = web_client.get(self.robots_url.clone().unwrap()).await;
+        let response = web_client.get(self.robots_url.clone()).await;
         let robots_body = response.body;
         
         //self.robots_url.as_ref().unwrap().as_str()

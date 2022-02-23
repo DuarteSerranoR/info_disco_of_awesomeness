@@ -9,7 +9,7 @@ use crate::logger::setup_logger;
 
 use crawler::robots_scraper::*;
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")] // https://docs.rs/tokio/1.4.0/tokio/attr.main.html
 async fn main() {
     setup_logger().expect("");
     let targets_vec = get_active_targets();
@@ -41,9 +41,9 @@ async fn main() {
 
     // Load Robots.txt
     let robots: Robots = Robots {
-        robots_url: None,
-        matcher: None,
-        body: String::from(""),
+        robots_url: String::new(),
+        matcher: Option::None,
+        body: String::new(),
         //crawl_delay: None
     };
     let robots = robots.load_robots(test_target.dns.clone()).await;
