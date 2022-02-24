@@ -60,7 +60,7 @@ impl Robots<'static> {
     // usage -> assert_eq!(false, matcher.one_agent_allowed_by_robots(body, "user-agent", url to match));
     pub fn check_url(self, url: String) -> bool {
         let mut user_agents_vec: Vec<&str> = Vec::new();
-        user_agents_vec.push("Du-Bot");
+        user_agents_vec.push("DuBot");
         user_agents_vec.push("*");
         return self.matcher.unwrap().allowed_by_robots(self.body.as_ref(), user_agents_vec, url.as_str());
     }

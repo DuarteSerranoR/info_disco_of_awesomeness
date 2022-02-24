@@ -4,7 +4,7 @@
 /// 
 /// The purpose of this Object is to allow the application to make http/https requests
 /// without having repeated code and in an optimized way.
-/// This object uses the hyper library's client.
+/// This object uses the hyper library's client and the hyper_tls's HttpConnector.
 /// 
 /// Usage:
 ///     1-> Create the WebClient object
@@ -43,7 +43,9 @@
 extern crate hyper;
 use std::str;
 use hyper::Client;
+use hyper::header::{ USER_AGENT, HeaderMap, HeaderValue };
 use hyper_tls::HttpsConnector;
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,8 +115,18 @@ impl WebClient {
 async fn fetch_url(url: hyper::Uri) -> Result<(String, u16), (String, u16)> {
 
     let https = HttpsConnector::new();
+    let mut headers = HeaderMap::new();
+
+    headers.append(USER_AGENT, HeaderValue::from_static("DuBot"));
+    //headers.append(HeaderName::from_static("User-Agent"), HeaderValue::from_static("DuBot"));
+    //headers.append("".parse().unwrap(), "".parse().unwrap());
+    //headers.append(USER_AGENT, "".parse().unwrap()); -> alternative found at 
+                                                        // https://docs.rs/hyper/0.13.1/hyper/struct.HeaderMap.html
+
+    
+    // An alternative to this hyper::Client would be the hyper::Request -> sets the user_agent/header directly
     let client = Client::builder()
-                                                    .build::<_, hyper::Body>(https);
+                        .build::<_, hyper::Body>(https);
 
     let response = match client.get(url).await {
         Ok(response) => response,
