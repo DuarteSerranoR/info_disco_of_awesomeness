@@ -1,8 +1,54 @@
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Web Client
+/// 
+/// The purpose of this Object is to allow the application to make http/https requests
+/// without having repeated code and in an optimized way.
+/// This object uses the hyper library's client.
+/// 
+/// Usage:
+///     1-> Create the WebClient object
+///             Ex.: let web_client: WebClient = WebClient::new();
+///     
+///     2-> Use the get(url: String) request to fetch an url's response
+///             In this request, the url String argument represents the url you 
+///             want to get a response from
+///             Ex.: let response = web_client.get(url);
+/// 
+/// Results:
+///     With your response, you get an object with the following structure:
+/// 
+///             url: String -> [it's private to the WebClient] represents the 
+///                             url where the request was made.
+/// 
+///             success: bool -> boolean that represents the success of the 
+///                             request made.
+/// 
+///             status: u16 -> 16-bit unsigned integer that represents the 
+///                             http status code returned by the url's server.
+/// 
+///             body: String -> String that contains the body returned with 
+///                             the request.
+/// 
+///             result: Result<(String, u16), (String, u16)> -> 
+///                             [it's private to the WebClient] represents the 
+///                             Result object generated with the request and 
+///                             encoding of the request.
+/// 
+/// 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 extern crate hyper;
 use std::str;
 use hyper::Client;
 use hyper_tls::HttpsConnector;
 
+
+///////////////////////////////////////////////////////////////////////////////
+/// Web Client Object
+///////////////////////////////////////////////////////////////////////////////
 #[derive(Clone)]
 pub struct WebClient {
     url: String,
@@ -12,7 +58,14 @@ pub struct WebClient {
     result: Result<(String, u16), (String, u16)>
 }
 
+///////////////////////////////////////////////////////////////////////////////
+/// Web Client Object's functions
+///////////////////////////////////////////////////////////////////////////////
 impl WebClient {
+
+    ///////////////////////////////////////////////////////////////////////////////
+    /// Constructor used to create a new WebClient instant
+    ///////////////////////////////////////////////////////////////////////////////
     pub fn new() -> Self {
         return Self {
             url: String::new(),
@@ -23,6 +76,10 @@ impl WebClient {
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////
+    /// Method used to use the get request in a 
+    /// shared way throughout the project
+    ///////////////////////////////////////////////////////////////////////////////
     pub async fn get(mut self, url: String) -> Self {
 
         self.url = url;
@@ -32,6 +89,9 @@ impl WebClient {
         return self;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////
+    /// Method used to save the request's status
+    ///////////////////////////////////////////////////////////////////////////////
     async fn request(mut self) -> Self {
     
         let url = self.url.parse::<hyper::Uri>().unwrap();
@@ -47,6 +107,9 @@ impl WebClient {
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+/// Method used to send the request and get the response
+///////////////////////////////////////////////////////////////////////////////
 async fn fetch_url(url: hyper::Uri) -> Result<(String, u16), (String, u16)> {
 
     let https = HttpsConnector::new();
