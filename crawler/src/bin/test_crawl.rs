@@ -8,6 +8,7 @@ use logger;
 use crate::logger::setup_logger;
 
 use crawler::robots_scraper::*;
+use crawler::rss_scraper::*;
 
 #[tokio::main(flavor = "current_thread")] // https://docs.rs/tokio/1.4.0/tokio/attr.main.html
 async fn main() {
@@ -48,17 +49,32 @@ async fn main() {
         should_crawl: true,
         success: false
     };
+    
     let robots = robots.load_robots(test_target.clone(), test_target.dns.clone()).await;
-
+    
     // Crawl
     if robots.check_url(test_target.url.clone()) {
-        log::info!("crawl");
-        //if scraper.crawl_rss(test_target.fulltext)
+        let mut rss_scraper = Rss::new(test_target.guid, test_target.url, /*Option::None,*/ test_target.fulltext_tag);
+        rss_scraper = rss_scraper.crawl_rss().await;
+        
+        let articles = rss_scraper.clone().articles;
 
-        //  foreach article in scraper.articles
-        //      if robots.check_url(article)
-        //          scraper.crawl_item(article);
+        drop(rss_scraper);
+        
+        /*
+        for article in rss_scraper.articles {
+            if robots.check_url(article) {
+                rss_scraper.crawl_item(article);
+            }
+        }
+        */
 
+        for article in articles {
+            print!("{}", article.title);
+            print!("{}", article.body.unwrap());
+        }
+
+        //drop(articles);
         // If product, then to database, otherwise (here) print the formated results
     }
 }

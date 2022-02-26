@@ -32,7 +32,7 @@ impl Robots<'static> {
         }
         else {
             self.body = String::from("");
-            log::error!("Robots.txt for target '{}' returned with status {}. Message: {}", 
+            log::error!("Robots.txt for target '{}' returned with status {}. Message: {}",
                         target.guid, response.status.clone(), response.body);
             drop(target);
             self.success = false;

@@ -8,6 +8,7 @@
 /// (sent through the construtor) and follows the apointed rules. It also allows you
 /// to specify full text tags, so that you don't need to later crawl into the items
 /// and get the Articles body through their links, making it faster and safer.
+/// This module uses the feed-rs crate to parse the rss feeds.
 /// 
 /// Usage:
 ///     1-> 
@@ -19,19 +20,28 @@
 /// 
 /// 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+use std::time::SystemTime;
+
+use uuid::Uuid;
+
+use crate::webclient::*;
+use feed_rs::parser;
+use feed_rs::model::*;
  
- 
+
 
 // TODO - implement this Article object inside the database_connector's codefirst 
 //      so it can be implemented in the database
+#[derive(Clone)]
 pub struct Article {
-    pub guid: Uuid,
-    pub title: str,
-    pub summary: str,
-    pub body: str,
+    pub guid: String,
+    pub title: String,
+    pub summary: Option<String>,
+    pub body: Option<String>,
     pub date: SystemTime,
-    pub author: str,
-    pub link: str
+    pub author: String,
+    pub link: String
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,14 +51,15 @@ pub struct Article {
 /// later converted into Articles, so they can be sent to the database
 /// and used from then on.
 ///////////////////////////////////////////////////////////////////////////////
+#[derive(Clone)]
 pub struct Item {
-    pub guid: Option<Uuid>,
-    pub title: Option<str>,
-    pub summary: Option<str>,
-    pub body: Option<str>,
+    pub guid: String,
+    pub title: Option<Text>,
+    pub summary: Option<Text>,
+    pub body: Option<String>,
     pub date: Option<SystemTime>,
-    pub author: Option<str>,
-    pub link: Option<str> // TODO - implement this object in a separate module "item_crawler"
+    pub authors: Vec<Person>,
+    pub link: Vec<Link>   // TODO - implement this object in a separate module "item_crawler"
                           //        so it can later be crawled separately (if there is no 
                           //        full_text_tag).
 }
@@ -56,8 +67,13 @@ pub struct Item {
 ///////////////////////////////////////////////////////////////////////////////
 /// Channel Object
 ///////////////////////////////////////////////////////////////////////////////
+#[derive(Clone)]
 pub struct Channel {
     pub items: Vec<Item>,
+}
+
+impl Channel {
+    pub fn new() -> Self { Self { items: Vec::new() } }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,13 +85,15 @@ pub struct Channel {
 /// Articles, returning those articles so they can be saved 
 /// into the database.
 ///////////////////////////////////////////////////////////////////////////////
+#[derive(Clone)]
 pub struct Rss {
     guid: Uuid,
-    pub url: str,
+    url: String,
     pub channels: Vec<Channel>,
     pub articles: Vec<Article>,
-    robots_txt: Option<Robots>,
-    full_text_tag: Option<str>
+    //robots_txt: Option<Robots<'a>>,
+    success: bool,
+    full_text_tag: Option<String>
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,32 +106,101 @@ impl Rss {
 
     ///////////////////////////////////////////////////////////////////////////////
     /// Constructors used to create a new RSS
-    /// 
-    /// These apply an overload which states that you don't need
-    /// to wrap your the optional Robots or full_text_tag into the
-    /// Object creation, they do it for you if null.
     ///////////////////////////////////////////////////////////////////////////////
-    pub fn new(guid: Uuid, url: str, robots_txt: Robots, full_text_tag: str) -> Self {
+    pub fn new(guid: Uuid, url: String/*, robots_txt: Option<Robots<'static>>*/, full_text_tag: Option<String>) -> Self {
         return Self {
-
+            guid,
+            url,
+            channels: Vec::new(),
+            articles: Vec::new(),
+            //robots_txt,
+            success: false,
+            full_text_tag
         };
     }
 
-    pub fn new(guid: Uuid, url: str, full_text_tag: str) -> Self {
-        return Self {
+    pub async fn crawl_rss(mut self) -> Self {
+        let web_client = WebClient::new();
+        let response = web_client.get(self.url.clone()).await;
+        if response.success.clone() {
+            self.success = true;
+            let xml = response.body;
+            let feed = parser::parse(xml.as_bytes()).unwrap();
 
-        };
-    }
+            let mut channel = Channel {
+                items: Vec::new()
+            };
 
-    pub fn new(guid: Uuid, url: str, robots_txt: Robots) -> Self {
-        return Self {
+            // Store items into a vector
+            for entrie in feed.entries {
+                let item = Item {
+                    guid: entrie.id,
+                    title: entrie.title,
+                    summary: entrie.summary,
+                    body: entrie.content.unwrap().body,
+                    date: Option::None,
+                    authors: entrie.authors,
+                    link: entrie.links
+                };
 
-        };
-    }
+                if item.body.is_none() && !self.full_text_tag.is_none() {
+                    // TODO - use xPath
+                }
 
-    pub fn new(guid: Uuid, url: str) -> Self {
-        return Self {
+                channel.items.push(item);
+            }
+            self.channels.push(channel);
 
-        };
+            // Transform the items into Articles
+            for channel in self.channels.clone() {
+                for item in channel.items {
+
+                    let guid = item.guid;
+                    let title = item.title.unwrap().content;
+                    let mut summary: Option<String> = Option::None;
+                    if item.summary.is_none() {
+                        log::warn!("No summary")
+                    }
+                    else {
+                        summary = Option::Some(item.summary.unwrap().content);                        
+                    }
+
+                    let body = item.body;
+                    if body.is_none() && !self.full_text_tag.is_none() {
+                        log::error!("No body in article.");
+                        self.success = false;
+                        return self;
+                    }
+                    let date: SystemTime;
+                    if item.date.is_none() {
+                        date = SystemTime::now();
+                    }
+                    else {
+                        date = item.date.unwrap();
+                    }
+                    let author = item.authors.first().unwrap().name.clone();
+                    let link = item.link.first().unwrap().href.clone();
+
+                    let article = Article {
+                        guid,
+                        title,
+                        summary,
+                        body,
+                        date,
+                        author,
+                        link
+                    };
+
+                    self.articles.push(article);
+                }
+            }
+        }
+        else {
+            log::error!("rss for target '{}' returned with status {}. Message: {}",
+                            self.guid, response.status.clone(), response.body);
+            
+            self.success = false;
+        }
+        return self;
     }
 }
