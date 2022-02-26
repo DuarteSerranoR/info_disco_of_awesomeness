@@ -16,7 +16,7 @@
 ///             Ex.: let response = web_client.get(url);
 /// 
 /// Results:
-///     With your response, you get an object with the following structure:
+///     With your get request, it returns an object with the following structure:
 /// 
 ///             url: String -> [it's private to the WebClient] represents the 
 ///                             url where the request was made.
@@ -123,8 +123,8 @@ async fn fetch_url(url: hyper::Uri) -> Result<(String, u16), (String, u16)> {
     //headers.append(USER_AGENT, "".parse().unwrap()); -> alternative found at 
                                                         // https://docs.rs/hyper/0.13.1/hyper/struct.HeaderMap.html
 
-    
-    // An alternative to this hyper::Client would be the hyper::Request -> sets the user_agent/header directly
+
+    //  An alternative to this hyper::Client would be the hyper::Request -> sets the user_agent/header directly
     let client = Client::builder()
                         .build::<_, hyper::Body>(https);
 
@@ -149,5 +149,5 @@ async fn fetch_url(url: hyper::Uri) -> Result<(String, u16), (String, u16)> {
     //let mut body = String::new();
     //result.read_to_string(&mut body).unwrap();
 
-    // Other options to implement -> https://docs.rs/hyper-tls/latest/hyper_tls/
+    //  Other options to implement -> https://docs.rs/hyper-tls/latest/hyper_tls/
 }
