@@ -1,3 +1,4 @@
+use diesel::Insertable;
 use uuid::Uuid;
 use std::time::SystemTime;
 
@@ -28,3 +29,18 @@ impl PartialEq for Target {
 }
 
 // to insert targets, should follow https://diesel.rs/guides/getting-started
+
+use super::schema::articles;
+
+#[derive(Queryable, Insertable, Clone)]
+pub struct Article {
+    pub guid: String,
+    pub targert_guid: Uuid,
+    pub title: String,
+    pub summary: Option<String>,
+    pub body: Option<String>,
+    pub date: Option<SystemTime>,
+    pub author: Option<String>,
+    pub link: String
+}
+

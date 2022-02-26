@@ -21,28 +21,18 @@
 /// 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+
 use std::time::SystemTime;
 
 use uuid::Uuid;
-
-use crate::webclient::*;
 use feed_rs::parser;
 use feed_rs::model::*;
+
+use database_connector::models::Article;
+use crate::webclient::*;
  
 
-
-// TODO - implement this Article object inside the database_connector's codefirst 
-//      so it can be implemented in the database
-#[derive(Clone)]
-pub struct Article {
-    pub guid: String,
-    pub title: String,
-    pub summary: Option<String>,
-    pub body: Option<String>,
-    pub date: SystemTime,
-    pub author: String,
-    pub link: String
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Crawled Item Object
@@ -171,18 +161,19 @@ impl Rss {
                         self.success = false;
                         return self;
                     }
-                    let date: SystemTime;
+                    let date: Option<SystemTime>;
                     if item.date.is_none() {
-                        date = SystemTime::now();
+                        date = Option::Some(SystemTime::now());
                     }
                     else {
-                        date = item.date.unwrap();
+                        date = item.date;
                     }
-                    let author = item.authors.first().unwrap().name.clone();
+                    let author = Option::Some(item.authors.first().unwrap().name.clone());
                     let link = item.link.first().unwrap().href.clone();
 
                     let article = Article {
                         guid,
+                        targert_guid: self.guid,
                         title,
                         summary,
                         body,

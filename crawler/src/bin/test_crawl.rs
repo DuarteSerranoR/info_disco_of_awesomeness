@@ -39,6 +39,7 @@ async fn main() {
     // TODO
     let time: Duration = Duration::from_secs(5); //
     sleep(time); //
+    drop(time);
 
     // Load Robots.txt
     let robots: Robots = Robots {
@@ -69,10 +70,24 @@ async fn main() {
         }
         */
 
+        let mut num_feeds = 0;
         for article in articles {
-            print!("{}", article.title);
-            print!("{}", article.body.unwrap());
+            let result = insert_article(article.clone());
+            if result.is_err() {
+                log::error!("Failed to insert article '{}'. Exception: {}",
+                            article.guid, result.err().unwrap());
+            }
+            else {
+                num_feeds += 1;
+            }
+            drop(article);
         }
+
+        log::info!("Target '{}' inserted {} feeds.", test_target.name, num_feeds)
+
+        //drop(test_target);
+        
+        // TODO - target logs after crawl (put exceptions, ......)
 
         //drop(articles);
         // If product, then to database, otherwise (here) print the formated results
