@@ -1,5 +1,7 @@
 This program was tested on the following targets so far:
     Microsoft Research
+    TechCrunch
+    MIT Technology Review
 
 TODO
     implement a dns to database, so it can use robots.txt in a generalized way

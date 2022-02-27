@@ -17,7 +17,9 @@ async fn main() {
 
     // Tests from db
     let test_target: Target = targets_vec.into_iter()
-        .find(|t| t.guid == Uuid::parse_str("9cd64569-7861-4cf5-9e9a-4b22670ff136").unwrap())
+        //.find(|t| t.guid == Uuid::parse_str("9cd64569-7861-4cf5-9e9a-4b22670ff136").unwrap())
+        //.find(|t| t.guid == Uuid::parse_str("298e6222-eb8a-4b9d-aa1f-c64832a4b50f").unwrap())
+        .find(|t| t.guid == Uuid::parse_str("2d294334-31d0-4670-ad2b-34d2b413a183").unwrap())
         .unwrap();
 
     /* HardcodedTests
