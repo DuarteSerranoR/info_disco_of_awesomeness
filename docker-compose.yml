@@ -13,7 +13,7 @@ services:
   database:
     container_name: database
     image: postgres:14.2
-    restart: always
+    #restart: always
     logging:
       options:
         max-size: 10m

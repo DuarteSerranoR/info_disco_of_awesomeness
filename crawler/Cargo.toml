@@ -23,9 +23,9 @@ database_connector = { path = "../database_connector" }
 log = "0.4"
 chrono = "0.4.19"
 ctrlc = "3.2.1"
-uuid = { version = "0.8.2", features = ["serde", "v4"] }
+uuid = { version = "0.8.2", features = ["serde", "v4"] } # Newer versions have a bug in Uuid obj - detects duplicate type
 lazy_static = "1.4.0"
-robotstxt = "0.3.0"
+#robotstxt = "0.3.0"
 hyper = { version = "0.14.17", features = ["full"] }
 hyper-tls = { version = "0.5.0" }
 tokio = { version = "1.17.0", features = ["full"] }

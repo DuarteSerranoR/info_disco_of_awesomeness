@@ -46,7 +46,7 @@ async fn main() {
     // Load Robots.txt
     let robots: Robots = Robots {
         robots_url: String::new(),
-        matcher: Option::None,
+        //matcher: Option::None,
         body: String::new(),
         //crawl_delay: None
         should_crawl: true,
@@ -60,17 +60,11 @@ async fn main() {
         let mut rss_scraper = Rss::new(test_target.guid, test_target.url, /*Option::None,*/ test_target.fulltext_tag);
         rss_scraper = rss_scraper.crawl_rss().await;
         
-        let articles = rss_scraper.clone().articles;
-
-        drop(rss_scraper);
-        
-        /*
-        for article in rss_scraper.articles {
-            if robots.check_url(article) {
-                rss_scraper.crawl_item(article);
-            }
+        if !rss_scraper.complete {
+            rss_scraper = rss_scraper.crawl_items().await;
         }
-        */
+
+        let articles: Vec<Article> = rss_scraper.clone().articles;
 
         let mut num_feeds = 0;
         for article in articles {

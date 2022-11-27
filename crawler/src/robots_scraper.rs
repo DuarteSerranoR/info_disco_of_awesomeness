@@ -1,11 +1,11 @@
 use crate::webclient::WebClient;
 use database_connector::models::Target;
-use robotstxt::{DefaultMatcher, matcher::{LongestMatchRobotsMatchStrategy, RobotsMatcher}};
+//use robotstxt::{DefaultMatcher, matcher::{LongestMatchRobotsMatchStrategy, RobotsMatcher}};
 
 
-pub struct Robots<'a> {
+pub struct Robots {
     pub robots_url: String,
-    pub matcher: Option<RobotsMatcher<'a, LongestMatchRobotsMatchStrategy>>,
+    //pub matcher: Option<RobotsMatcher<'a, LongestMatchRobotsMatchStrategy>>,
     pub body: String,
     //pub crawl_delay: Option<i32>,
     //pub disallowed_vec: Vec<String>,
@@ -14,9 +14,9 @@ pub struct Robots<'a> {
     pub should_crawl: bool
 }
 
-impl Robots<'static> {
+impl Robots {
 
-    pub async fn load_robots(mut self, target: Target, dns: String) -> Robots<'static> {
+    pub async fn load_robots(mut self, target: Target, dns: String) -> Robots {
         self.robots_url = format!("https://{}/robots.txt", dns);
         drop(dns);
 
@@ -52,17 +52,17 @@ impl Robots<'static> {
         //self.robots_url.as_ref().unwrap().as_str()
 
         // TODO -> make my own implementation for crawl_interval and other necessities
-        let matcher: RobotsMatcher<LongestMatchRobotsMatchStrategy> = DefaultMatcher::default();
-        self.matcher = Option::Some(matcher);
+        //let matcher: RobotsMatcher<LongestMatchRobotsMatchStrategy> = DefaultMatcher::default();
+        //self.matcher = Option::Some(matcher);
         return self;
     }
     
     // usage -> assert_eq!(false, matcher.one_agent_allowed_by_robots(body, "user-agent", url to match));
-    pub fn check_url(self, url: String) -> bool {
+    pub fn check_url(self, _url: String) -> bool {
         let mut user_agents_vec: Vec<&str> = Vec::new();
         user_agents_vec.push("DuBot");
         user_agents_vec.push("*");
-        return self.matcher.unwrap().allowed_by_robots(self.body.as_ref(), user_agents_vec, url.as_str());
+        return true;//self.matcher.unwrap().allowed_by_robots(self.body.as_ref(), user_agents_vec, url.as_str()); // BUG
     }
 
     /*

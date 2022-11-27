@@ -83,6 +83,7 @@ pub struct Rss {
     pub articles: Vec<Article>,
     //robots_txt: Option<Robots<'a>>,
     success: bool,
+    pub complete: bool,
     full_text_tag: Option<String>
 }
 
@@ -105,6 +106,7 @@ impl Rss {
             articles: Vec::new(),
             //robots_txt,
             success: false,
+            complete: false,
             full_text_tag
         };
     }
@@ -143,6 +145,7 @@ impl Rss {
 
             // Transform the items into Articles
             for channel in self.channels.clone() {
+                let mut item_complete: bool = true;
                 for item in channel.items {
 
                     let guid = item.guid;
@@ -156,11 +159,11 @@ impl Rss {
                     }
 
                     let body = item.body;
-                    if body.is_none() && !self.full_text_tag.is_none() {
+                    /*if body.is_none() && !self.full_text_tag.is_none() {
                         log::error!("No body in article.");
                         self.success = false;
                         return self;
-                    }
+                    }*/
                     let date: Option<SystemTime>;
                     if item.date.is_none() {
                         date = Option::Some(SystemTime::now());
@@ -170,6 +173,10 @@ impl Rss {
                     }
                     let author = Option::Some(item.authors.first().unwrap().name.clone());
                     let link = item.link.first().unwrap().href.clone();
+                    
+                    if title.clone().is_empty() || body.clone().is_none() {
+                        item_complete = false;
+                    }
 
                     let article = Article {
                         guid,
@@ -184,6 +191,10 @@ impl Rss {
 
                     self.articles.push(article);
                 }
+                if item_complete {
+                    self.complete = true;
+                }
+                drop(item_complete);
             }
         }
         else {
@@ -192,6 +203,30 @@ impl Rss {
             
             self.success = false;
         }
+        return self;
+    }
+
+    pub async fn crawl_items(self) -> Self {
+        panic!("Not implemented!");
+        /*
+        for article in self.articles {
+            if article.title == "" {
+                article.title = "TODO";
+            }
+            if article.body == "" {
+                article.body = "TODO";
+            }
+            if article.summary == "" {
+                article.summary = "TODO";
+            }
+            if article.date == "" {
+                article.date = "TODO";
+            }
+            if article.author == "" {
+                article.author = "TODO";
+            }
+        }
+        */
         return self;
     }
 }

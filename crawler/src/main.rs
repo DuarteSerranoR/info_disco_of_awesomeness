@@ -55,7 +55,7 @@ fn main() {
     // Setup Configurations /////////////////////////////////////////////////
 
     // Setup the program logs
-    setup_logger().expect("");
+    setup_logger().expect("Failed to load logger!");
 
     // Configure SIGTERM and SIGHUP handling
     // For CRL + C listening
